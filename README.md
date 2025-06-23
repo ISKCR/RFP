@@ -1,1 +1,616 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>27卒 新卒採用パートナー募集 - インタラクティブ提案依頼書</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: "Warm Neutral & Calm Blue" - ベージュ系の背景に、信頼感と知性を感じさせる落ち着いた青をアクセントカラーとして使用。プロフェッショナルかつ穏やかな印象を与えます。 -->
+    <!-- Application Structure Plan: RFPの内容をコンサルティング会社が直感的に理解できるよう、ダッシュボード形式で再構成。1. プロジェクト概要（目標の可視化）、2. 現在の採用課題（課題の構造化・可視化）、3. 求める人物像（多角的な分析）、4. 依頼内容（要件の整理）、5. スケジュール（時系列での把握）、6. AI面接質問ジェネレーター（AI活用による見極め支援）の6つのセクションに分け、ナビゲーションでアクセスしやすくしました。この構造は、RFPの情報を単に羅列するのではなく、課題の深刻さとプロジェクトの重要性を効果的に伝え、提案の質を高めることを目的としています。 -->
+    <!-- Visualization & Content Choices: 
+        - Project Overview -> Goal: Inform -> Donut Chart -> Hover -> 採用目標の「内定承諾率50%」を視覚的に訴求。Chart.jsを使用。
+        - Current Challenges -> Goal: Organize & Inform -> HTML/CSS Diagram -> Hover Effects -> 採用プロセスのボトルネック（歩留まり）をフロー図で可視化。テキストより直感的な理解を促す。
+        - Ideal Candidate -> Goal: Compare & Analyze -> Radar Chart -> Hover Tooltips -> 求める人物像の多面的な特性をレーダーチャートで表現。理想のプロファイルを一目で把握可能にする。Chart.jsを使用。
+        - Ideal Candidate -> Goal: Inform -> Interactive Toggle Lists -> Click to expand -> 過去の見送り理由と失敗事例をトグル形式で表示。情報を整理し、UIをクリーンに保つ。Vanilla JSを使用。
+        - Request -> Goal: Inform -> HTML/CSS Grid -> Static -> 依頼内容の5つの主要領域を分かりやすく整理。
+        - Schedule -> Goal: Change (over time) -> HTML/CSS Timeline -> Static -> 選定スケジュールを時系列で分かりやすく提示。
+        - AI Interview Question Generator -> Goal: Inform & Engage -> Text input, Button, Text output -> AIが採用基準に基づいて面接質問を生成。具体的な見極めイメージを補助。Gemini API (gemini-2.0-flash)とVanilla JSを使用。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #FDFBF7;
+            color: #383838;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 300px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover {
+            color: #3B82F6;
+            border-bottom-color: #3B82F6;
+        }
+        .active-link {
+            color: #3B82F6;
+            font-weight: 700;
+            border-bottom-color: #3B82F6;
+        }
+        .details-marker {
+            transition: transform 0.2s;
+        }
+        details[open] .details-marker {
+            transform: rotate(90deg);
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3B82F6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="antialiased">
 
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <div class="container mx-auto px-4">
+            <nav class="flex justify-between items-center py-4">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800">27卒 新卒採用パートナー募集</h1>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#overview" class="nav-link pb-1 border-b-2 border-transparent">概要</a>
+                    <a href="#challenges" class="nav-link pb-1 border-b-2 border-transparent">課題</a>
+                    <a href="#candidate" class="nav-link pb-1 border-b-2 border-transparent">求める人物像</a>
+                    <a href="#request" class="nav-link pb-1 border-b-2 border-transparent">依頼内容</a>
+                    <a href="#schedule" class="nav-link pb-1 border-b-2 border-transparent">スケジュール</a>
+                    <a href="#ai-questions" class="nav-link pb-1 border-b-2 border-transparent">AI質問生成</a>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-gray-100 border border-gray-300 rounded-md p-2">
+                        <option value="#overview">概要</option>
+                        <option value="#challenges">課題</option>
+                        <option value="#candidate">求める人物像</option>
+                        <option value="#request">依頼内容</option>
+                        <option value="#schedule">スケジュール</option>
+                        <option value="#ai-questions">AI質問生成</option>
+                    </select>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 md:py-16">
+
+        <!-- Section 1: Overview -->
+        <section id="overview" class="mb-16 md:mb-24 scroll-mt-24">
+            <h2 class="text-3xl font-bold text-center mb-4 text-gray-800">プロジェクト概要</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">
+                本プロジェクトの目的は、単なる採用代行ではなく、貴社の知見を活かして弊社の採用課題を根本から解決し、将来的な採用活動の内製化を実現することです。27年卒採用を成功させると共に、持続可能な採用体制を構築するパートナーを求めています。
+            </p>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100">
+                    <h3 class="text-2xl font-bold mb-4 text-center text-blue-600">主要採用目標 (27卒)</h3>
+                    <div class="space-y-6 text-lg">
+                        <div class="flex items-center">
+                            <span class="text-blue-500 mr-4 text-2xl">🎯</span>
+                            <div>
+                                <p class="font-bold text-gray-700">採用人数</p>
+                                <p class="text-2xl font-bold text-gray-900">10名以上</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-blue-500 mr-4 text-2xl">🤝</span>
+                            <div>
+                                <p class="font-bold text-gray-700">内定承諾率</p>
+                                <p class="text-2xl font-bold text-gray-900">50%以上</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                             <span class="text-blue-500 mr-4 text-2xl">🌱</span>
+                            <div>
+                                <p class="font-bold text-gray-700">最終ゴール</p>
+                                <p class="text-xl font-bold text-gray-900">採用プロセスの内製化</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    <h3 class="text-xl font-bold text-center mb-4 text-gray-800">目標内定承諾率: 50%</h3>
+                    <div class="chart-container">
+                        <canvas id="acceptanceRateChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Current Challenges -->
+        <section id="challenges" class="mb-16 md:mb-24 scroll-mt-24">
+            <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">現在の採用課題</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">
+                現在、採用活動は複数の深刻な課題に直面しています。特にエージェント依存からの脱却と、採用ファネル全体の歩留まり改善が急務です。これらの課題構造を可視化しました。
+            </p>
+            <div class="grid lg:grid-cols-2 gap-12 items-start">
+                <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100">
+                    <h3 class="text-2xl font-bold mb-6 text-gray-800">4つの主要課題</h3>
+                    <div class="space-y-4">
+                        <div class="bg-red-50 border border-red-200 p-4 rounded-lg">
+                            <h4 class="font-bold text-red-800">1. 母集団形成の不足</h4>
+                            <p class="text-red-700">エージェント紹介に依存。多様なチャネルからの応募がない。</p>
+                        </div>
+                        <div class="bg-red-50 border border-red-200 p-4 rounded-lg">
+                            <h4 class="font-bold text-red-800">2. 歩留まり全体の進捗不良</h4>
+                            <p class="text-red-700">各選考フェーズでの遷移率・承諾率が低い。</p>
+                        </div>
+                        <div class="bg-red-50 border border-red-200 p-4 rounded-lg">
+                            <h4 class="font-bold text-red-800">3. インターンの形骸化</h4>
+                            <p class="text-red-700">採用に繋がる戦略的インターンが実施できていない。</p>
+                        </div>
+                         <div class="bg-red-50 border border-red-200 p-4 rounded-lg">
+                            <h4 class="font-bold text-red-800">4. 工数不足</h4>
+                            <p class="text-red-700">人事担当者のリソースが不足し、新たな施策が困難。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100">
+                    <h3 class="text-2xl font-bold mb-6 text-gray-800">課題の構造：採用ファネルの現状</h3>
+                     <div class="space-y-2 text-center">
+                        <div class="bg-gray-100 p-4 rounded-t-lg">
+                            <p class="font-bold">母集団形成</p>
+                            <p class="text-sm text-gray-600">エージェント紹介のみ</p>
+                        </div>
+                        <div class="flex justify-center items-center text-red-500 font-bold">
+                            <span class="text-2xl">🔻</span>
+                            <p class="ml-2">課題：母集団の量・質</p>
+                        </div>
+                        <div class="bg-gray-100 p-4">
+                            <p class="font-bold">説明会 / カジュアル面談</p>
+                        </div>
+                        <div class="flex justify-center items-center text-red-500 font-bold">
+                            <span class="text-2xl">🔻</span>
+                             <p class="ml-2">課題：選考遷移率が低い</p>
+                        </div>
+                         <div class="bg-gray-100 p-4">
+                            <p class="font-bold">選考プロセス</p>
+                        </div>
+                        <div class="flex justify-center items-center text-red-500 font-bold">
+                           <span class="text-2xl">🔻</span>
+                             <p class="ml-2">課題：内定承諾率が低い</p>
+                        </div>
+                        <div class="bg-gray-100 p-4">
+                            <p class="font-bold">内定</p>
+                        </div>
+                        <div class="flex justify-center items-center text-red-500 font-bold">
+                           <span class="text-2xl">🔻</span>
+                             <p class="ml-2">課題：内定承諾後辞退</p>
+                        </div>
+                        <div class="bg-blue-600 text-white p-4 rounded-b-lg">
+                            <p class="font-bold">入社</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Ideal Candidate -->
+        <section id="candidate" class="mb-16 md:mb-24 scroll-mt-24">
+            <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">求める人物像</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">
+                採用の成功は、適切な人材を見極めることから始まります。弊社が求める人物像は多岐にわたります。基準を深くご理解いただき、これを見抜くための選考プロセスの設計をご提案ください。
+            </p>
+            <div class="grid lg:grid-cols-2 gap-12 items-start">
+                 <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-gray-800">重要特性</h3>
+                    <div class="chart-container h-[400px] max-h-[400px]">
+                        <canvas id="candidateRadarChart"></canvas>
+                    </div>
+                </div>
+                <div class="space-y-8">
+                    <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100">
+                        <h3 class="text-2xl font-bold mb-4 text-gray-800">基本要件</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <h4 class="font-bold text-gray-700">■ 学歴基準</h4>
+                                <ul class="list-disc list-inside text-gray-600">
+                                    <li>高校偏差値55以上、または</li>
+                                    <li>大学 学部偏差値50以上</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-700">■ スカウタ基準</h4>
+                                 <ul class="list-disc list-inside text-gray-600">
+                                    <li>自律欲求が平均以上</li>
+                                    <li>能力テストで総合点が平均以上</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100">
+                        <h3 class="text-2xl font-bold mb-4 text-gray-800">見極めのポイント</h3>
+                        <p class="text-gray-600 mb-4">過去の経験から、以下の点は特に重要視しています。これらを見極める手法のご提案を期待します。</p>
+                        <div class="space-y-2">
+                           <details class="bg-amber-50 rounded-lg p-4 cursor-pointer">
+                                <summary class="font-bold text-amber-800 flex justify-between items-center">
+                                    <span>過去の見送り理由</span>
+                                    <span class="details-marker text-lg transition-transform">▶</span>
+                                </summary>
+                                <ul class="list-disc list-inside mt-3 text-amber-700 space-y-1">
+                                    <li>自己中心的なキャリア観（起業したい等）</li>
+                                    <li>ワークライフバランスへの過度な固執</li>
+                                    <li>理屈が腹落ちしないと行動しない傾向</li>
+                                    <li>事業理解への意欲・準備不足</li>
+                                </ul>
+                           </details>
+                           <details class="bg-red-50 rounded-lg p-4 cursor-pointer">
+                                <summary class="font-bold text-red-800 flex justify-between items-center">
+                                    <span>採用後の失敗事例</span>
+                                    <span class="details-marker text-lg transition-transform">▶</span>
+                                </summary>
+                                <ul class="list-disc list-inside mt-3 text-red-700 space-y-1">
+                                    <li>【影響大】コミュニケーション能力、理解力・想像力、行動力の不足</li>
+                                    <li>【影響中】達成志向性の欠如</li>
+                                    <li>【影響小】自己成長意欲の低さ</li>
+                                </ul>
+                           </details>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Request -->
+        <section id="request" class="mb-16 md:mb-24 scroll-mt-24">
+            <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">ご提案依頼内容</h2>
+             <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">
+                本プロジェクト成功のため、以下の5つの領域における包括的なコンサルティングと実行支援、そして最終的な内製化に向けた伴走支援を依頼いたします。
+            </p>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    <h3 class="text-xl font-bold mb-2 text-blue-700">1. 採用戦略の立案</h3>
+                    <p class="text-gray-600">事業戦略に基づく全体戦略と、ターゲット人材（ペルソナ）の明確化。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    <h3 class="text-xl font-bold mb-2 text-blue-700">2. 採用広報戦略</h3>
+                    <p class="text-gray-600">母集団形成の多角化、ターゲットに響くコンテンツ企画、媒体選定支援。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    <h3 class="text-xl font-bold mb-2 text-blue-700">3. プロセス設計・運営</h3>
+                    <p class="text-gray-600">効果的な選考プロセス、戦略的インターン企画、面接官トレーニングの実施。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    <h3 class="text-xl font-bold mb-2 text-blue-700">4. 内定者フォロー</h3>
+                    <p class="text-gray-600">内定承諾率向上と辞退防止のための計画立案と実行支援。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 col-span-1 sm:col-span-2 lg:col-span-1">
+                    <h3 class="text-xl font-bold mb-2 text-green-700">5. ノウハウ移管・内製化支援</h3>
+                    <p class="text-gray-600">企画書等の成果物共有、そして自走できる状態までの具体的なロードマップ提示と伴走支援。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Schedule -->
+        <section id="schedule" class="mb-16 md:mb-24 scroll-mt-24">
+            <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">選定スケジュール</h2>
+            <div class="max-w-2xl mx-auto">
+                <div class="relative pl-8 border-l-2 border-blue-200">
+                    <div class="mb-8">
+                        <div class="absolute w-6 h-6 bg-blue-500 rounded-full -left-3 border-4 border-white"></div>
+                        <p class="font-bold text-blue-600">2025年7月25日（金）</p>
+                        <h3 class="text-xl font-bold text-gray-800">提案書提出期限</h3>
+                    </div>
+                     <div class="mb-8">
+                        <div class="absolute w-6 h-6 bg-blue-500 rounded-full -left-3 border-4 border-white"></div>
+                        <p class="font-bold text-blue-600">2025年8月4日（月）～8日（金）</p>
+                        <h3 class="text-xl font-bold text-gray-800">プレゼンテーション・質疑応答</h3>
+                        <p class="text-gray-600">一次選考を通過された上位3社程度を予定しています。</p>
+                    </div>
+                     <div class="mb-8">
+                        <div class="absolute w-6 h-6 bg-blue-500 rounded-full -left-3 border-4 border-white"></div>
+                        <p class="font-bold text-blue-600">2025年8月15日（金）</p>
+                        <h3 class="text-xl font-bold text-gray-800">最終結果通知</h3>
+                    </div>
+                    <div>
+                        <div class="absolute w-6 h-6 bg-blue-500 rounded-full -left-3 border-4 border-white"></div>
+                        <p class="font-bold text-blue-600">2025年8月中旬以降</p>
+                        <h3 class="text-xl font-bold text-gray-800">契約締結・プロジェクト開始</h3>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: AI Interview Question Generator -->
+        <section id="ai-questions" class="mb-16 md:mb-24 scroll-mt-24">
+            <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">✨ AI面接質問ジェネレーター</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">
+                弊社の「求める人物像」や「過去の失敗事例」を踏まえ、特定の特性を見極めるための面接質問をAIが生成します。貴社の具体的な提案にご活用ください。
+            </p>
+            <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100 max-w-2xl mx-auto">
+                <h3 class="text-2xl font-bold mb-6 text-gray-800">質問生成</h3>
+                <div class="mb-4">
+                    <label for="traitInput" class="block text-gray-700 text-lg font-bold mb-2">見極めたい特性・懸念点:</label>
+                    <textarea id="traitInput" rows="3" class="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent" placeholder="例: コミュニケーション能力の円滑さ、柔軟性、会社貢献意欲、論理的思考力"></textarea>
+                </div>
+                <button id="generateQuestionsBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 w-full text-lg">
+                    ✨ 面接質問を生成
+                </button>
+                <div id="loadingIndicator" class="hidden mt-6 text-center">
+                    <div class="spinner mx-auto mb-2"></div>
+                    <p class="text-blue-600 font-medium">質問生成中...</p>
+                </div>
+                <div id="questionsOutput" class="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg hidden">
+                    <h4 class="font-bold text-blue-800 text-xl mb-4">生成された面接質問:</h4>
+                    <div id="questionList" class="text-blue-700 leading-relaxed space-y-3"></div>
+                </div>
+                <div id="errorMessage" class="hidden mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded relative" role="alert">
+                    <p class="font-bold">エラーが発生しました</p>
+                    <p class="text-sm">質問の生成中に問題が発生しました。時間をおいて再度お試しください。</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-16 md:mt-24">
+        <div class="container mx-auto px-4 py-8 text-center">
+            <h3 class="text-2xl font-bold mb-4">お問い合わせ</h3>
+            <p>ご不明な点、ご質問は下記までお気軽にご連絡ください。</p>
+            <p class="mt-2">株式会社[貴社名] 人事部 [ご自身の氏名]</p>
+            <p>Email: [ご自身のメールアドレス] | 電話: [ご自身の電話番号]</p>
+            <p class="text-sm mt-6 text-gray-400">&copy; 2025 株式会社[貴社名]</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Chart.js: Doughnut Chart for Acceptance Rate
+            const acceptanceCtx = document.getElementById('acceptanceRateChart').getContext('2d');
+            new Chart(acceptanceCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['承諾', '辞退/その他'],
+                    datasets: [{
+                        data: [50, 50],
+                        backgroundColor: [
+                            '#3B82F6', // blue-500
+                            '#E5E7EB'  // gray-200
+                        ],
+                        borderColor: '#FDFBF7',
+                        borderWidth: 4,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Chart.js: Radar Chart for Candidate Profile
+            const radarCtx = document.getElementById('candidateRadarChart').getContext('2d');
+            new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['対人スキル', '思考力', '行動力', '質問力', '志向性', '会社貢献意欲'],
+                    datasets: [{
+                        label: '求める人物像',
+                        data: [9, 8, 9, 7, 8, 10], // Example scores out of 10
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(59, 130, 246, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                     scales: {
+                        r: {
+                            angleLines: {
+                                color: '#D1D5DB' // gray-300
+                            },
+                            grid: {
+                                color: '#E5E7EB' // gray-200
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                color: '#4B5563' // gray-600
+                            },
+                            ticks: {
+                                beginAtZero: true,
+                                max: 10,
+                                stepSize: 2,
+                                backdropColor: 'transparent',
+                                color: '#6B7280' // gray-500
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                           display: false
+                        }
+                    }
+                }
+            });
+
+            // Smooth scrolling for navigation
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // Mobile navigation
+            document.getElementById('mobile-nav').addEventListener('change', function(e) {
+                const target = e.target.value;
+                if(target) {
+                    document.querySelector(target).scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+
+            // Active nav link highlighting on scroll
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active-link');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active-link');
+                            }
+                        });
+                        const mobileNav = document.getElementById('mobile-nav');
+                        mobileNav.value = '#' + entry.target.id;
+                    }
+                });
+            }, { rootMargin: "-50% 0px -50% 0px" });
+
+            sections.forEach(section => observer.observe(section));
+
+
+            // LLM Integration for AI Interview Question Generator
+            const traitInput = document.getElementById('traitInput');
+            const generateQuestionsBtn = document.getElementById('generateQuestionsBtn');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const questionsOutput = document.getElementById('questionsOutput');
+            const questionList = document.getElementById('questionList');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Hardcoded context from RFP for LLM prompt
+            const companyName = "株式会社[貴社名]"; // Placeholder for actual company name
+            const idealCandidateDetails = `
+                学歴基準: 高校偏差値55以上、または大学 学部偏差値50以上。
+                スカウタ基準: 自律欲求が平均以上、能力テストで総合点が平均以上。
+                人物像: 清潔感（スーツのサイズ感、皺や汚れがないか、眉毛、ひげなど）、対人スキル（会話のスピードが異常に速い・遅いことがなく、適宜笑顔を交えながら話せる、端的過ぎる回答をしない）、思考力（経歴の説明に一貫性があり、利他的な思想・他者貢献/会社貢献意欲がある）、行動力（成功体験・失敗体験のエピソードが2,3以上あり、失敗体験からの再発防止説明ができる）、質問力（一問一答形式でなく会話の流れで深堀りでき、質問意図が明確で補足できる）、志向性（事業内容への強い興味、若手活躍・早期成長意欲、裁量、ある程度の残業を厭わない）。
+            `;
+
+            const pastRejectionReasons = `
+                過去見送り理由: 起業志向など自己中心的なキャリア観で、その発言が面接官に与える印象を考慮できていない。ワークライフバランスを過度に気にしている。理屈が腹落ちしないと動かない傾向。考えが浅く、事業理解をしようとしていない（事前準備、または理解しようとする姿勢が見られない）。
+            `;
+
+            const postHireFailureCases = `
+                採用後の失敗事例:
+                影響大: コミュニケーション能力（話すスピード、円滑さ、論理的か、結論から話せるか、QAズレがないか）、理解力・想像力（直接情報だけでなく背景・隠れた意図推測、分からないことを理解しようとするか、理解してアクションに繋げられるか）、行動力（指示に対する即時行動、量、柔軟性）。
+                影響中: 達成志向性（目標計画・実行、諦めずに努力）。
+                影響小: 自己成長意欲（未経験分野への取り組み、課題に対する自らの改善）。
+            `;
+
+            generateQuestionsBtn.addEventListener('click', async () => {
+                const trait = traitInput.value.trim();
+                if (!trait) {
+                    alert('見極めたい特性・懸念点を入力してください。');
+                    return;
+                }
+
+                loadingIndicator.classList.remove('hidden');
+                questionsOutput.classList.add('hidden');
+                errorMessage.classList.add('hidden');
+                questionList.innerHTML = '';
+
+                const prompt = `あなたは${companyName}の新卒採用面接官です。弊社の以下の採用基準と過去の採用失敗事例を深く理解した上で、候補者の「${trait}」という特性を効果的に見極めるための具体的な面接質問を5つ生成してください。質問は自然な会話の流れに沿った形式でお願いします。
+
+                --- 弊社の採用基準 ---
+                ${idealCandidateDetails}
+
+                --- 過去の見送り理由 ---
+                ${pastRejectionReasons}
+
+                --- 採用後の失敗事例 ---
+                ${postHireFailureCases}
+
+                質問:
+                1.`;
+
+                try {
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                    const payload = { contents: chatHistory };
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`API error: ${response.status} ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        const questions = text.split('\n').filter(q => q.trim() !== '').map(q => q.replace(/^\d+\.\s*/, '')); // Remove numbering
+                        questions.forEach((q, index) => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `<span class="font-bold text-blue-900">${index + 1}.</span> ${q.trim()}`;
+                            questionList.appendChild(li);
+                        });
+                        questionsOutput.classList.remove('hidden');
+                    } else {
+                        console.error('Unexpected API response structure:', result);
+                        errorMessage.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error('Error generating questions:', error);
+                    errorMessage.classList.remove('hidden');
+                } finally {
+                    loadingIndicator.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
